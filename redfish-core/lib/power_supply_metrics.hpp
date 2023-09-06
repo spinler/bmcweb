@@ -5,7 +5,6 @@
 #include "dbus_singleton.hpp"
 #include "dbus_utility.hpp"
 #include "error_messages.hpp"
-#include "logging.hpp"
 #include "query.hpp"
 #include "registries/privilege_registry.hpp"
 #include "utility.hpp"
@@ -60,7 +59,6 @@ inline void addInputHistoryProperties(
 
     if (!success)
     {
-        BMCWEB_LOG_ERROR << "Unable to unpack input history properties";
         messages::internalError(asyncResp->res);
         return;
     }
@@ -152,12 +150,11 @@ inline void getInputHistory(const std::shared_ptr<bmcweb::AsyncResp>& asyncResp,
             *crow::connections::systemBus, service, historyPaths.front(),
             interface,
             [asyncResp, historyPaths,
-             interface](const boost::system::error_code& ec,
+             interface](const boost::system::error_code ec,
                         const dbus::utility::DBusPropertiesMap&
                             propertiesList) mutable {
             if (ec)
             {
-                BMCWEB_LOG_ERROR << "D-Bus response error: " << ec;
                 messages::internalError(asyncResp->res);
                 return;
             }
@@ -185,7 +182,7 @@ inline void getValidInputHistoryPaths(
     redfish::chassis_utils::getValidChassisPath(
         asyncResp, chassisId,
         [asyncResp, chassisId, powerSupplyId, callback{std::move(callback)}](
-            const std::optional<std::string>& validChassisPath) mutable {
+            const std::optional<std::string>& validChassisPath) {
         if (!validChassisPath)
         {
             messages::resourceNotFound(asyncResp->res, "Chassis", chassisId);
@@ -196,7 +193,7 @@ inline void getValidInputHistoryPaths(
         redfish::power_supply_utils::getValidPowerSupplyPath(
             asyncResp, *validChassisPath, powerSupplyId,
             [asyncResp, callback{std::move(callback)}](
-                const std::string& validPowerSupplyPath) mutable {
+                const std::string& validPowerSupplyPath) {
             // Get input history D-Bus paths
             redfish::power_supply_utils::getInputHistoryPaths(
                 asyncResp, validPowerSupplyPath,

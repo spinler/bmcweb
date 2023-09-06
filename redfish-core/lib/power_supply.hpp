@@ -390,7 +390,7 @@ inline void
         asyncResp, validPowerSupplyPath,
         [asyncResp, chassisId,
          powerSupplyId](const std::vector<std::string>& historyPaths) {
-        if (!historyPaths.empty())
+        if (historyPaths.size() > 0)
         {
             asyncResp->res.jsonValue["Metrics"]["@odata.id"] =
                 crow::utility::urlFromPieces(
